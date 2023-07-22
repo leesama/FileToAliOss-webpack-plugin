@@ -12,6 +12,22 @@
     "test": "jest --collectCoverage",
     "release": "npm version patch"
   },
+  "devDependencies": {
+    "@types/ali-oss": "^6.16.8",
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.4.4",
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "@babel/preset-typescript": "^7.22.9",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "ali-oss": "^6.17.1",
+    "chalk": "^5.3.0",
+    "lodash": "^4.17.21"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/leesama/FileToAliOss-webpack-plugin.git"
