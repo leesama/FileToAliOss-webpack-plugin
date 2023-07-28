@@ -51,8 +51,39 @@ const DEFAULT_CONFIG: OSSPluginConfig = {
 
 const red = chalkUtils.red;
 const green = chalkUtils.bold.green;
+function isTruthy(val: string) {
+  return val === "true";
+}
 
-export default class WebpackAliOSSPlugin {
+function getTimeStr(date: Date) {
+  return `${date.getFullYear()}-${
+    date.getMonth() + 1
+  }-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
+}
+
+function getFileContentBuffer(file: any, useGzip: boolean | number) {
+  const gzip = typeof useGzip === "number" || useGzip === true;
+  const options = typeof useGzip === "number" ? { level: useGzip } : {};
+  if (!gzip) {
+    return Promise.resolve(Buffer.from(file.content));
+  }
+  return new Promise<Buffer>((resolve, reject) => {
+    zlib.gzip(Buffer.from(file.content), options, (err, gzipBuffer) => {
+      if (err) reject(err);
+      resolve(gzipBuffer as Buffer);
+    });
+  });
+}
+
+function mergeCustomizer(objValue: any, srcValue: any) {
+  if (lodash.isPlainObject(objValue) && lodash.isPlainObject(srcValue)) {
+    return lodash.merge(objValue, srcValue);
+  } else {
+    return srcValue;
+  }
+}
+
+class FileToAliOssWebpackPlugin {
   private config: OSSPluginConfig;
   private ossClient: AliOSSClient;
   private finalPrefix: string | undefined;
@@ -337,35 +368,4 @@ export default class WebpackAliOSSPlugin {
     console.warn(chalkUtils.bgMagenta("[webpack-alioss-plugin]:"), ...messages);
   }
 }
-
-function isTruthy(val: string) {
-  return val === "true";
-}
-
-function getTimeStr(date: Date) {
-  return `${date.getFullYear()}-${
-    date.getMonth() + 1
-  }-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
-}
-
-function getFileContentBuffer(file: any, useGzip: boolean | number) {
-  const gzip = typeof useGzip === "number" || useGzip === true;
-  const options = typeof useGzip === "number" ? { level: useGzip } : {};
-  if (!gzip) {
-    return Promise.resolve(Buffer.from(file.content));
-  }
-  return new Promise<Buffer>((resolve, reject) => {
-    zlib.gzip(Buffer.from(file.content), options, (err, gzipBuffer) => {
-      if (err) reject(err);
-      resolve(gzipBuffer as Buffer);
-    });
-  });
-}
-
-function mergeCustomizer(objValue: any, srcValue: any) {
-  if (lodash.isPlainObject(objValue) && lodash.isPlainObject(srcValue)) {
-    return lodash.merge(objValue, srcValue);
-  } else {
-    return srcValue;
-  }
-}
+module.exports = FileToAliOssWebpackPlugin;
