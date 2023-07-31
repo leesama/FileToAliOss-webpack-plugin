@@ -38,13 +38,11 @@ describe("FileToAliOssWebpackPlugin", () => {
 
     it("uploads a gzipped file to AliOSS if useGzip is true", async () => {
       const mockPut = jest.fn();
-      plugin["ossClient"].put = mockPut;
-
       plugin = new FileToAliOssWebpackPlugin({
         ...mockPluginConfig,
         useGzip: true,
       });
-
+      plugin["ossClient"].put = mockPut;
       await plugin.uploadFile(mockFile, mockUploadName);
 
       expect(mockPut).toHaveBeenCalledWith(mockUploadName, expect.any(Buffer), {
