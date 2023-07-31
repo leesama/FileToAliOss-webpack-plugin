@@ -1,5 +1,4 @@
 import AliOSSClient from "ali-oss";
-import { Buffer } from "buffer";
 import zlib from "zlib";
 
 export type OSSAuthConfig = {
@@ -23,7 +22,24 @@ class FileToAliOssWebpackPlugin {
     this.ossClient = new AliOSSClient(this.config.auth);
   }
 
-  async uploadFile(file: any, uploadName: string) {
+  apply(compiler: any) {
+    compiler.hooks.emit.tapPromise(
+      "FileToAliOssWebpackPlugin",
+      async (compilation: any) => {
+        const files = this.pickupAssetFiles(compilation);
+        await this.uploadFiles(files);
+      }
+    );
+  }
+
+  private async uploadFiles(files: any[]) {
+    for (const file of files) {
+      const uploadName = file.name;
+      await this.uploadFile(file, uploadName);
+    }
+  }
+
+  private async uploadFile(file: any, uploadName: string) {
     const contentBuffer = await this.getFileContentBuffer(file);
     await this.ossClient.put(
       uploadName,
@@ -52,6 +68,18 @@ class FileToAliOssWebpackPlugin {
       };
     }
     return undefined;
+  }
+
+  private pickupAssetFiles(compilation: any) {
+    const matchedAssets: any = {};
+    const assetKeys = Object.keys(compilation.assets);
+    for (const key of assetKeys) {
+      matchedAssets[key] = compilation.assets[key];
+    }
+    return Object.keys(matchedAssets).map((name) => ({
+      name,
+      content: matchedAssets[name].source(),
+    }));
   }
 }
 
