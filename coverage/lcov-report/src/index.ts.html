@@ -3,15 +3,15 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for index.ts</title>
+    <title>Code coverage report for src/index.ts</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="prettify.css" />
-    <link rel="stylesheet" href="base.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.png" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type='text/css'>
         .coverage-summary .sorter {
-            background-image: url(sort-arrow-sprite.png);
+            background-image: url(../sort-arrow-sprite.png);
         }
     </style>
 </head>
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="index.html">All files</a> index.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> index.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.96% </span>
+                <span class="strong">40.56% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>36/106</span>
+                <span class='fraction'>43/106</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">24.19% </span>
+                <span class="strong">30.64% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>15/62</span>
+                <span class='fraction'>19/62</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">45.83% </span>
+                <span class="strong">54.16% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>11/24</span>
+                <span class='fraction'>13/24</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">35.29% </span>
+                <span class="strong">42.15% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>36/102</span>
+                <span class='fraction'>43/102</span>
             </div>
         
             
@@ -450,10 +450,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -611,7 +611,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -630,8 +630,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -773,11 +773,11 @@ function <span class="fstat-no" title="function not covered" >getTimeStr(</span>
   }-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
 }
 &nbsp;
-function <span class="fstat-no" title="function not covered" >getFileContentBuffer(</span>file: any, useGzip: boolean | number) {
-  const gzip = <span class="cstat-no" title="statement not covered" >typeof useGzip === "number" || useGzip === true;</span>
-  const options = <span class="cstat-no" title="statement not covered" >typeof useGzip === "number" ? { level: useGzip } : {};</span>
-<span class="cstat-no" title="statement not covered" >  if (!gzip) {</span>
-<span class="cstat-no" title="statement not covered" >    return Promise.resolve(Buffer.from(file.content));</span>
+function getFileContentBuffer(file: any, useGzip: boolean | number) {
+  const gzip = typeof useGzip === "number" || useGzip === true;
+  const options = typeof useGzip === "number" ? <span class="branch-0 cbranch-no" title="branch not covered" >{ level: useGzip } </span>: {};
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!gzip) {
+    return Promise.resolve(Buffer.from(file.content));
   }
 <span class="cstat-no" title="statement not covered" >  return new Promise&lt;Buffer&gt;(<span class="fstat-no" title="function not covered" >(r</span>esolve, reject) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    zlib.gzip(Buffer.from(file.content), options, <span class="fstat-no" title="function not covered" >(e</span>rr, gzipBuffer) =&gt; {</span>
@@ -935,7 +935,7 @@ class FileToAliOssWebpackPlugin {
 <span class="cstat-no" title="statement not covered" >            throw new Error("Not exist, need to upload");</span>
           }
         } catch (err) {
-<span class="cstat-no" title="statement not covered" >          await this.uploadFile(</span>
+          await this.uploadFile(
             file,
             currentIndex++,
             files,
@@ -947,15 +947,15 @@ class FileToAliOssWebpackPlugin {
     }
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  pr</span>ivate async uploadFile(
+  private async uploadFile(
     file: any,
     currentIndex: number,
     files: any[],
     compilation: any,
     uploadName: string
   ) {
-    const totalFiles = <span class="cstat-no" title="statement not covered" >files.length;</span>
-    const contentBuffer = <span class="cstat-no" title="statement not covered" >await getFileContentBuffer(file, this.config.useGzip);</span>
+    const totalFiles = files.length;
+    const contentBuffer = await getFileContentBuffer(file, this.config.useGzip);
     const options = <span class="cstat-no" title="statement not covered" >this.getUploadOptions(this.config.useGzip);</span>
 <span class="cstat-no" title="statement not covered" >    for (let retry = <span class="cstat-no" title="statement not covered" >1;</span> retry &lt;= this.config.retry + 1; retry++) {</span>
 <span class="cstat-no" title="statement not covered" >      try {</span>
@@ -1042,16 +1042,16 @@ module.exports = FileToAliOssWebpackPlugin;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-08-01T15:35:25.482Z
+                at 2023-08-01T16:02:56.538Z
             </div>
-        <script src="prettify.js"></script>
+        <script src="../prettify.js"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="sorter.js"></script>
-        <script src="block-navigation.js"></script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
     </body>
 </html>
     

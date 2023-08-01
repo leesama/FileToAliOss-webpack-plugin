@@ -1,62 +1,132 @@
-const  FileToAliOssWebpackPlugin =require('../src/index')
-import {OSSPluginConfig} from '../src/index'
-
-jest.mock("ali-oss");
+const FileToAliOssWebpackPlugin = require("../src/index");
+const mockUploadFile = require("./mockFile.png");
 
 describe("FileToAliOssWebpackPlugin", () => {
-  let plugin: typeof FileToAliOssWebpackPlugin;
-  let mockCompilation: any;
-  const mockConfig: OSSPluginConfig = {
-    auth: {
-      accessKeyId: "your-access-key-id",
-      accessKeySecret: "your-access-key-secret",
-      bucket: "your-bucket",
-      region: "your-region",
-    },
-    retry: 3,
-    existCheck: true,
-    ossBaseDir: "auto_upload_ci",
-    projectName: "",
-    prefix: "",
-    exclude: /.*\.html$/,
-    enableLog: false,
-    ignoreErrors: false,
-    removeMode: true,
-    useGzip: true,
-    envPrefix: "",
-    options: undefined,
+  const mockAuthConfig = {
+    accessKeyId: "test-access-key-id",
+    accessKeySecret: "test-access-key-secret",
+    bucket: "test-bucket",
+    region: "test-region",
   };
+  const mockPluginConfig = {
+    auth: mockAuthConfig,
+    useGzip: false,
+  };
+  const mockUploadName = "test-upload-name";
+
+  let plugin: typeof FileToAliOssWebpackPlugin;
 
   beforeEach(() => {
-    mockCompilation = {
-      assets: {
-        "file1.js": {
-          existsAt: "/path/to/file1.js",
-          source: () => "console.log('Hello, World!');",
+    plugin = new FileToAliOssWebpackPlugin(mockPluginConfig);
+  });
+
+  describe("uploadFile", () => {
+    it("uploads a file to AliOSS", async () => {
+      const mockPut = jest.fn();
+      plugin["ossClient"].put = mockPut;
+      const files = [
+        { name: "file1.txt", $retryTime: 0, content: mockUploadFile },
+        { name: "file2.txt", $retryTime: 0, content: mockUploadFile },
+      ];
+      const compilation = { assets: { "file1.txt": {}, "file2.txt": {} } };
+      await plugin.uploadFiles(files, compilation);
+      expect(mockPut).toHaveBeenCalledWith(
+        mockUploadName,
+        Buffer.from(content),
+        {}
+      );
+    });
+    it("uploads a gzipped file to AliOSS if useGzip is true", async () => {
+      const mockPut = jest.fn();
+      plugin["ossClient"].put = mockPut;
+
+      plugin = new FileToAliOssWebpackPlugin({
+        ...mockPluginConfig,
+        useGzip: true,
+      });
+
+      await plugin.uploadFile(mockFile, mockUploadName);
+
+      expect(mockPut).toHaveBeenCalledWith(mockUploadName, expect.any(Buffer), {
+        headers: { "Content-Encoding": "gzip" },
+      });
+    });
+  });
+
+  describe("apply", () => {
+    it("uploads all files in the compilation to AliOSS", async () => {
+      const mockCompilation = {
+        assets: {
+          "file1.js": {
+            source: () => "test-file-1-content",
+          },
+          "file2.css": {
+            source: () => "test-file-2-content",
+          },
         },
-        "file2.css": {
-          existsAt: "/path/to/file2.css",
-          source: () => "body { color: red; }",
+      };
+      const mockUploadFile = jest.fn();
+      plugin.uploadFile = mockUploadFile;
+
+      await plugin.apply(mockCompilation as any);
+
+      expect(mockUploadFile).toHaveBeenCalledTimes(1);
+      expect(mockUploadFile).toHaveBeenCalledWith(
+        { content: "test-file-1-content" },
+        "oss/dir/file1.js"
+      );
+    });
+
+    it("skips files that match the exclude pattern", async () => {
+      const mockCompilation = {
+        assets: {
+          "file1.js": {
+            source: () => "test-file-1-content",
+          },
+          "file2.css": {
+            source: () => "test-file-2-content",
+          },
         },
-      },
-      errors: [],
-    };
-    plugin = new FileToAliOssWebpackPlugin(mockConfig);
-  });
+      };
+      const mockUploadFile = jest.fn();
+      plugin.uploadFile = mockUploadFile;
 
-  it("should calculate the finalPrefix correctly when prefix is set", () => {
-    const config = { ...mockConfig, prefix: "test-prefix" };
-    plugin = new FileToAliOssWebpackPlugin(config);
-    expect(plugin["calculatePrefix"]()).toEqual("test-prefix");
-  });
+      plugin = new FileToAliOssWebpackPlugin({
+        ...mockPluginConfig,
+        exclude: /file2\.css/,
+      });
 
-  it("should calculate the finalPrefix correctly when projectName is set", () => {
-    const config = { ...mockConfig, projectName: "test-project" };
-    plugin = new FileToAliOssWebpackPlugin(config);
-    expect(plugin["calculatePrefix"]()).toEqual("auto_upload_ci/test-project");
-  });
+      await plugin.apply(mockCompilation as any);
 
-  it("should calculate the finalPrefix correctly when projectName is not set", () => {
-    expect(plugin["calculatePrefix"]()).toEqual("auto_upload_ci");
+      expect(mockUploadFile).toHaveBeenCalledTimes(1);
+      expect(mockUploadFile).toHaveBeenCalledWith(
+        { content: "test-file-1-content" },
+        "oss/dir/file1.js"
+      );
+    });
+
+    it("skips files that already exist on AliOSS if existCheck is true", async () => {
+      const mockCompilation = {
+        assets: {
+          "file1.js": {
+            source: () => "test-file-1-content",
+          },
+        },
+      };
+      const mockUploadFile = jest.fn();
+      plugin.uploadFile = mockUploadFile;
+
+      const mockHead = jest.fn(() => ({ status: 200 }));
+      plugin["ossClient"].head = mockHead;
+
+      plugin = new FileToAliOssWebpackPlugin({
+        ...mockPluginConfig,
+        existCheck: true,
+      });
+
+      await plugin.apply(mockCompilation as any);
+
+      expect(mockUploadFile).toHaveBeenCalledTimes(0);
+    });
   });
 });
