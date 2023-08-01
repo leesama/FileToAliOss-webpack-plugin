@@ -50,8 +50,5 @@
     "dist/",
     "src/"
   ],
-  "keywords": [
-    "compress images",
-    "cli"
-  ]
+  "keywords": []
 }
