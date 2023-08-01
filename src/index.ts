@@ -1,6 +1,5 @@
 import pathUtils from "path";
 import chalkUtils from "chalk";
-import lodash from "lodash";
 import AliOSSClient from "ali-oss";
 import { Buffer } from "buffer";
 import zlib from "zlib";
@@ -28,7 +27,7 @@ export type OSSPluginConfig = {
   options: any;
 };
 export type FileToAliOssWebpackPluginConfig = Partial<OSSPluginConfig> & {};
-const DEFAULT_CONFIG: OSSPluginConfig = {
+const defaultConfig: OSSPluginConfig = {
   auth: {
     accessKeyId: "",
     accessKeySecret: "",
@@ -75,14 +74,6 @@ function getFileContentBuffer(file: any, useGzip: boolean | number) {
   });
 }
 
-function mergeCustomizer(objValue: any, srcValue: any) {
-  if (lodash.isPlainObject(objValue) && lodash.isPlainObject(srcValue)) {
-    return lodash.merge(objValue, srcValue);
-  } else {
-    return srcValue;
-  }
-}
-
 class FileToAliOssWebpackPlugin {
   private config: OSSPluginConfig;
   private ossClient: AliOSSClient;
@@ -96,17 +87,16 @@ class FileToAliOssWebpackPlugin {
     // Initialize Aliyun OSS client
     this.ossClient = new AliOSSClient(this.config.auth);
   }
-  private mergeConfig(
-    config?: FileToAliOssWebpackPluginConfig
-  ): OSSPluginConfig {
+
+  private mergeConfig(config?: FileToAliOssWebpackPluginConfig): OSSPluginConfig {
     const envConfig = this.getEnvironmentConfig(config?.envPrefix);
-    return lodash.mergeWith(
-      lodash.cloneDeep(DEFAULT_CONFIG),
-      envConfig,
-      config || {},
-      mergeCustomizer
-    );
+    return {
+      ...defaultConfig,
+      ...envConfig,
+      ...(config || {}),
+    };
   }
+
   private validateRetry() {
     if (typeof this.config.retry !== "number" || this.config.retry < 0) {
       this.config.retry = 0;
@@ -116,7 +106,7 @@ class FileToAliOssWebpackPlugin {
   private getEnvironmentConfig(envPrefix?: string): Partial<OSSPluginConfig> {
     const getEnvVar = (suffix: string) =>
       process.env[
-        `${envPrefix ?? this.config.envPrefix}FILE_TO_ALIOSS_PLUGIN_${suffix}`
+        `${envPrefix || defaultConfig}FILE_TO_ALIOSS_PLUGIN_${suffix}`
       ] || "";
 
     return {
@@ -279,7 +269,7 @@ class FileToAliOssWebpackPlugin {
   }
 
   private getUploadOptions(useGzip: boolean) {
-    const hasValidOptions = lodash.isPlainObject(this.config.options);
+    const hasValidOptions = this.config.options && typeof this.config.options === "object";
     if (useGzip) {
       if (hasValidOptions) {
         if (!this.config.options.headers) {
@@ -305,10 +295,10 @@ class FileToAliOssWebpackPlugin {
         matchedAssets[key] = compilation.assets[key];
       }
     }
-    return lodash.map(matchedAssets, (value, name) => ({
+    return Object.keys(matchedAssets).map((name) => ({
       name,
-      path: value.existsAt,
-      content: value.source(),
+      path: matchedAssets[name].existsAt,
+      content: matchedAssets[name].source(),
     }));
   }
 
@@ -322,18 +312,13 @@ class FileToAliOssWebpackPlugin {
   }
 
   private log(...messages: any[]) {
-    this.config.enableLog &&
-      console.log(
-        chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"),
-        ...messages
-      );
+    if (this.config.enableLog) {
+      console.log(chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"), ...messages);
+    }
   }
 
   private warn(...messages: any[]) {
-    console.warn(
-      chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"),
-      ...messages
-    );
+    console.warn(chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"), ...messages);
   }
 }
 module.exports = FileToAliOssWebpackPlugin;

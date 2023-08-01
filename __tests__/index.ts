@@ -1,68 +1,62 @@
-const FileToAliOssWebpackPlugin = require("../src/index");
+const  FileToAliOssWebpackPlugin =require('../src/index')
+import {OSSPluginConfig} from '../src/index'
+
+jest.mock("ali-oss");
 
 describe("FileToAliOssWebpackPlugin", () => {
-  describe("calculatePrefix", () => {
-    it("should return the finalPrefix if it is already set", () => {
-      const plugin = new FileToAliOssWebpackPlugin({ prefix: "test-prefix" });
-      plugin.finalPrefix = "final-prefix";
-      // expect(plugin.calculatePrefix()).toEqual("final-prefix");
-    });
+  let plugin: typeof FileToAliOssWebpackPlugin;
+  let mockCompilation: any;
+  const mockConfig: OSSPluginConfig = {
+    auth: {
+      accessKeyId: "your-access-key-id",
+      accessKeySecret: "your-access-key-secret",
+      bucket: "your-bucket",
+      region: "your-region",
+    },
+    retry: 3,
+    existCheck: true,
+    ossBaseDir: "auto_upload_ci",
+    projectName: "",
+    prefix: "",
+    exclude: /.*\.html$/,
+    enableLog: false,
+    ignoreErrors: false,
+    removeMode: true,
+    useGzip: true,
+    envPrefix: "",
+    options: undefined,
+  };
 
-    // it("should use the prefix if it is set", () => {
-    //   const plugin = new FileToAliOssWebpackPlugin({ prefix: "test-prefix" });
-    //   expect(plugin.calculatePrefix()).toEqual("test-prefix");
-    // });
-
-    // it("should use ossBaseDir and projectName if prefix is not set", () => {
-    //   const plugin = new FileToAliOssWebpackPlugin({
-    //     ossBaseDir: "test-ossBaseDir",
-    //     projectName: "test-projectName",
-    //   });
-    //   expect(plugin.calculatePrefix()).toEqual(
-    //     "test-ossBaseDir/test-projectName"
-    //   );
-    // });
-
-    // it("should use ossBaseDir if projectName is not set", () => {
-    //   const plugin = new FileToAliOssWebpackPlugin({
-    //     ossBaseDir: "test-ossBaseDir",
-    //   });
-    //   expect(plugin.calculatePrefix()).toEqual("test-ossBaseDir");
-    // });
-
-    // it("should use ossBaseDir if projectName is not available and cannot be extracted from package.json", () => {
-    //   const plugin = new FileToAliOssWebpackPlugin({
-    //     ossBaseDir: "test-ossBaseDir",
-    //   });
-    //   plugin.getNpmProjectName = jest.fn().mockReturnValue("");
-    //   plugin.warn = jest.fn();
-    //   expect(plugin.calculatePrefix()).toEqual("test-ossBaseDir");
-    //   expect(plugin.warn).toHaveBeenCalledWith(
-    //     "Using default upload directory: test-ossBaseDir"
-    //   );
-    // });
+  beforeEach(() => {
+    mockCompilation = {
+      assets: {
+        "file1.js": {
+          existsAt: "/path/to/file1.js",
+          source: () => "console.log('Hello, World!');",
+        },
+        "file2.css": {
+          existsAt: "/path/to/file2.css",
+          source: () => "body { color: red; }",
+        },
+      },
+      errors: [],
+    };
+    plugin = new FileToAliOssWebpackPlugin(mockConfig);
   });
 
-  describe("getNpmProjectName", () => {
-    it("should return the name from package.json if it exists", () => {
-      const plugin = new FileToAliOssWebpackPlugin({});
-      jest.mock("path", () => ({
-        resolve: () => "../package.json",
-      }));
-      jest.mock("../package.json", () => ({
-        name: "test-projectName",
-      }));
-      expect(plugin.getNpmProjectName()).toEqual("test-projectName");
-    });
+  it("should calculate the finalPrefix correctly when prefix is set", () => {
+    const config = { ...mockConfig, prefix: "test-prefix" };
+    plugin = new FileToAliOssWebpackPlugin(config);
+    expect(plugin["calculatePrefix"]()).toEqual("test-prefix");
+  });
 
-    it("should return an empty string if package.json does not exist", () => {
-      const plugin = new FileToAliOssWebpackPlugin({});
-      jest.mock("path", () => ({
-        resolve: () => {
-          throw new Error("File not found");
-        },
-      }));
-      expect(plugin.getNpmProjectName()).toEqual("");
-    });
+  it("should calculate the finalPrefix correctly when projectName is set", () => {
+    const config = { ...mockConfig, projectName: "test-project" };
+    plugin = new FileToAliOssWebpackPlugin(config);
+    expect(plugin["calculatePrefix"]()).toEqual("auto_upload_ci/test-project");
+  });
+
+  it("should calculate the finalPrefix correctly when projectName is not set", () => {
+    expect(plugin["calculatePrefix"]()).toEqual("auto_upload_ci");
   });
 });

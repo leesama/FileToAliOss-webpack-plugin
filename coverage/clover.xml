@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1690862709653" clover="3.2.0">
-  <project timestamp="1690862709654" name="All files">
+<coverage generated="1690882377983" clover="3.2.0">
+  <project timestamp="1690882377983" name="All files">
     <metrics statements="104" coveredstatements="9" conditionals="64" coveredconditionals="3" methods="25" coveredmethods="4" elements="193" coveredelements="16" complexity="0" loc="104" ncloc="104" packages="1" files="1" classes="1"/>
-    <file name="index.ts" path="D:\frontend\npm\FileToAliOss-webpack-plugin\src\index.ts">
+    <file name="index.ts" path="D:\code\npm\FileToAliOss-webpack-plugin\src\index.ts">
       <metrics statements="104" coveredstatements="9" conditionals="64" coveredconditionals="3" methods="25" coveredmethods="4"/>
       <line num="31" count="1" type="stmt"/>
       <line num="52" count="1" type="stmt"/>
