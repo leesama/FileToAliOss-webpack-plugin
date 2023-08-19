@@ -88,7 +88,9 @@ class FileToAliOssWebpackPlugin {
     this.ossClient = new AliOSSClient(this.config.auth);
   }
 
-  private mergeConfig(config?: FileToAliOssWebpackPluginConfig): OSSPluginConfig {
+  private mergeConfig(
+    config?: FileToAliOssWebpackPluginConfig
+  ): OSSPluginConfig {
     const envConfig = this.getEnvironmentConfig(config?.envPrefix);
     return {
       ...defaultConfig,
@@ -269,7 +271,8 @@ class FileToAliOssWebpackPlugin {
   }
 
   private getUploadOptions(useGzip: boolean) {
-    const hasValidOptions = this.config.options && typeof this.config.options === "object";
+    const hasValidOptions =
+      this.config.options && typeof this.config.options === "object";
     if (useGzip) {
       if (hasValidOptions) {
         if (!this.config.options.headers) {
@@ -313,12 +316,18 @@ class FileToAliOssWebpackPlugin {
 
   private log(...messages: any[]) {
     if (this.config.enableLog) {
-      console.log(chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"), ...messages);
+      console.log(
+        chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"),
+        ...messages
+      );
     }
   }
 
   private warn(...messages: any[]) {
-    console.warn(chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"), ...messages);
+    console.warn(
+      chalkUtils.bgMagenta("[fileToAliOss-webpack-plugin]:"),
+      ...messages
+    );
   }
 }
 module.exports = FileToAliOssWebpackPlugin;
