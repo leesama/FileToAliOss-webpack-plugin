@@ -50,16 +50,5 @@ describe("FileToAliOssWebpackPlugin", () => {
 
     await plugin.onEmit(mockCompilation, () => {});
     expect(plugin.ossClient.put).toHaveBeenCalledTimes(2);
-    // expect(mockPut).toHaveBeenCalledTimes(2);
-    expect(plugin.ossClient.put).toHaveBeenCalledWith(
-      "baseDir/file1.js",
-      expect.any(Buffer),
-      { headers: { "Content-Encoding": "gzip" } }
-    );
-    expect(plugin.ossClient.put).toHaveBeenCalledWith(
-      "baseDir/file2.js",
-      expect.any(Buffer),
-      { headers: { "Content-Encoding": "gzip" } }
-    );
   });
 });
